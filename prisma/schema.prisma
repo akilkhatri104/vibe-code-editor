@@ -27,6 +27,7 @@ model User {
   image     String?
   accounts Account[]
   role UserRole @default(USER)
+  emailVerified Boolean?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

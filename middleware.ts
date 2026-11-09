@@ -4,7 +4,6 @@ import {
   DEFAULT_LOGIN_REDIRECT,
   apiAuthPrefix,
   publicRoutes,
-  protectedRoutes,
   authRoutes,
 } from "@/routes";
 
@@ -17,15 +16,26 @@ export default auth((req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
 
+  const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
 
-  if (isAuthRoute && isLoggedIn) {
-    return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
+  // Never intercept NextAuth's own endpoints (/api/auth/signin, /callback, /session, ...)
+  if (isApiAuthRoute) {
+    return null;
+  }
+
+  if (isAuthRoute) {
+    if (isLoggedIn) {
+      return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
+    }
+
+    // Auth pages must stay reachable while signed out, otherwise we loop.
+    return null;
   }
 
   if (!isLoggedIn && !isPublicRoute) {
-    return NextResponse.redirect("/auth/signin", nextUrl);
+    return NextResponse.redirect(new URL("/auth/sign-in", nextUrl));
   }
 
   return null;

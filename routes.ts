@@ -4,7 +4,7 @@
  * @type {string[]}
  */
 
-export const publicRoutes: string[] = [];
+export const publicRoutes: string[] = ["/auth/sign-in"];
 
 /**
  * An Array of routes that are protected
